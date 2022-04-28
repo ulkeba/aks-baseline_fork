@@ -2,6 +2,9 @@ targetScope = 'resourceGroup'
 
 /*** PARAMETERS ***/
 
+@description('The name prefix for this stamp.')
+param prefix string
+
 @description('The regional hub network to which this regional spoke will peer to.')
 @minLength(79)
 param hubVnetResourceId string
@@ -28,7 +31,7 @@ param location string
 
 // A designator that represents a business unit id and application id
 var orgAppId = 'BU0001A0008'
-var clusterVNetName = 'vnet-spoke-${orgAppId}-00'
+var clusterVNetName = '${prefix}-vnet-spoke-${orgAppId}-00'
 
 /*** EXISTING HUB RESOURCES ***/
 
@@ -46,20 +49,20 @@ resource hubVirtualNetwork 'Microsoft.Network/virtualNetworks@2021-05-01' existi
 // This is the firewall that was deployed in 'hub-default.bicep'
 resource hubFirewall 'Microsoft.Network/azureFirewalls@2021-05-01' existing = {
   scope: hubResourceGroup
-  name: 'fw-${location}'
+  name: '${prefix}-fw-${location}'
 }
 
 // This is the networking log analytics workspace (in the hub)
 resource laHub 'Microsoft.OperationalInsights/workspaces@2021-06-01' existing = {
   scope: hubResourceGroup
-  name: 'la-hub-${location}'
+  name: '${prefix}-la-hub-${location}'
 }
 
 /*** RESOURCES ***/
 
 // Next hop to the regional hub's Azure Firewall
 resource routeNextHopToFirewall 'Microsoft.Network/routeTables@2021-05-01' = {
-  name: 'route-to-${location}-hub-fw'
+  name: '${prefix}-route-to-${location}-hub-fw'
   location: location
   properties: {
     routes: [
@@ -77,7 +80,7 @@ resource routeNextHopToFirewall 'Microsoft.Network/routeTables@2021-05-01' = {
 
 // Default NSG on the AKS nodepools. Feel free to constrict further.
 resource nsgNodepoolSubnet 'Microsoft.Network/networkSecurityGroups@2021-05-01' = {
-  name: 'nsg-${clusterVNetName}-nodepools'
+  name: '${prefix}-nsg-${clusterVNetName}-nodepools'
   location: location
   properties: {
     securityRules: []
@@ -100,7 +103,7 @@ resource nsgNodepoolSubnet_diagnosticsSettings 'Microsoft.Insights/diagnosticSet
 
 // Default NSG on the AKS internal load balancer subnet. Feel free to constrict further.
 resource nsgInternalLoadBalancerSubnet 'Microsoft.Network/networkSecurityGroups@2021-05-01' = {
-  name: 'nsg-${clusterVNetName}-aksilbs'
+  name: '${prefix}-nsg-${clusterVNetName}-aksilbs'
   location: location
   properties: {
     securityRules: []
@@ -123,7 +126,7 @@ resource nsgInternalLoadBalancerSubnet_diagnosticsSettings 'Microsoft.Insights/d
 
 // NSG on the Application Gateway subnet.
 resource nsgAppGwSubnet 'Microsoft.Network/networkSecurityGroups@2021-05-01' = {
-  name: 'nsg-${clusterVNetName}-appgw'
+  name: '${prefix}-nsg-${clusterVNetName}-appgw'
   location: location
   properties: {
     securityRules: [
@@ -217,7 +220,7 @@ resource nsgAppGwSubnet_diagnosticsSettings 'Microsoft.Insights/diagnosticSettin
 
 // NSG on the Private Link subnet.
 resource nsgPrivateLinkEndpointsSubnet 'Microsoft.Network/networkSecurityGroups@2021-05-01' = {
-  name: 'nsg-${clusterVNetName}-privatelinkendpoints'
+  name: '${prefix}-nsg-${clusterVNetName}-privatelinkendpoints'
   location: location
   properties: {
     securityRules: [
@@ -391,7 +394,7 @@ resource vnetSpoke_diagnosticSettings 'Microsoft.Insights/diagnosticSettings@202
 // Used as primary public entry point for cluster. Expected to be assigned to an Azure Application Gateway.
 // This is a public facing IP, and would be best behind a DDoS Policy (not deployed simply for cost considerations)
 resource pipPrimaryClusterIp 'Microsoft.Network/publicIPAddresses@2021-05-01' = {
-  name: 'pip-${orgAppId}-00'
+  name: '${prefix}-pip-${orgAppId}-00'
   location: location
   sku: {
     name: 'Standard'

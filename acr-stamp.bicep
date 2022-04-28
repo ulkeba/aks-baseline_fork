@@ -2,6 +2,9 @@ targetScope = 'resourceGroup'
 
 /*** PARAMETERS ***/
 
+@description('The name prefix for this stamp.')
+param prefix string
+
 @description('The regional network spoke VNet Resource ID that the cluster will be joined to.')
 @minLength(79)
 param targetVnetResourceId string
@@ -76,7 +79,7 @@ resource spokeVirtualNetwork 'Microsoft.Network/virtualNetworks@2021-05-01' exis
 
 // This Log Analytics workspace will be the log sink for all resources in the cluster resource group. This includes ACR, the AKS cluster, Key Vault, etc. It also is the Container Insights log sink for the AKS cluster.
 resource laAks 'Microsoft.OperationalInsights/workspaces@2021-06-01' = {
-  name: 'la-aks-${subRgUniqueString}'
+  name: '${prefix}-la-aks-${subRgUniqueString}'
   location: location
   properties: {
     sku: {
@@ -106,7 +109,7 @@ resource dnsPrivateZoneAcr 'Microsoft.Network/privateDnsZones@2020-06-01' = {
 
 // The Container Registry that the AKS cluster will be authorized to use to pull images.
 resource acrAks 'Microsoft.ContainerRegistry/registries@2021-09-01' = {
-  name: 'acraks${subRgUniqueString}'
+  name: '${prefix}acraks${subRgUniqueString}'
   location: location
   sku: {
     name: 'Premium'
@@ -139,11 +142,6 @@ resource acrAks 'Microsoft.ContainerRegistry/registries@2021-09-01' = {
     zoneRedundancy: 'Disabled' // This Preview feature only supports three regions at this time, and eastus2's paired region (centralus), does not support this. So disabling for now.
   }
 
-  resource acrReplication 'replications@2021-09-01' = {
-    name: geoRedundancyLocation
-    location: geoRedundancyLocation
-    properties: {}
-  }
 }
 
 resource acrAks_diagnosticsSettings 'Microsoft.Insights/diagnosticSettings@2021-05-01-preview' = {
@@ -169,11 +167,8 @@ resource acrAks_diagnosticsSettings 'Microsoft.Insights/diagnosticSettings@2021-
 
 // Expose Azure Container Registry via Private Link, into the cluster nodes subnet.
 resource privateEndpointAcrToVnet 'Microsoft.Network/privateEndpoints@2021-05-01' = {
-  name: 'pe-${acrAks.name}'
+  name: '${prefix}-pe-${acrAks.name}'
   location: location
-  dependsOn: [
-    acrAks::acrReplication
-  ]
   properties: {
     subnet: {
       id: spokeVirtualNetwork::snetPrivateLinkEndpoints.id

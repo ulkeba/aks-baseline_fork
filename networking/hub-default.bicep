@@ -2,6 +2,9 @@ targetScope = 'resourceGroup'
 
 /*** PARAMETERS ***/
 
+@description('The name prefix for this stamp.')
+param prefix string
+
 @allowed([
   'australiaeast'
   'canadacentral'
@@ -47,7 +50,7 @@ param hubVirtualNetworkBastionSubnetAddressSpace string = '10.200.0.96/27'
 // This Log Analytics workspace stores logs from the regional hub network, its spokes, and bastion.
 // Log analytics is a regional resource, as such there will be one workspace per hub (region)
 resource laHub 'Microsoft.OperationalInsights/workspaces@2021-06-01' = {
-  name: 'la-hub-${location}'
+  name: '${prefix}-la-hub-${location}'
   location: location
   properties: {
     sku: {
@@ -89,7 +92,7 @@ resource laHub_diagnosticsSettings 'Microsoft.Insights/diagnosticSettings@2021-0
 
 // NSG around the Azure Bastion Subnet.
 resource nsgBastionSubnet 'Microsoft.Network/networkSecurityGroups@2021-05-01' = {
-  name: 'nsg-${location}-bastion'
+  name: '${prefix}-nsg-${location}-bastion'
   location: location
   properties: {
     securityRules: [
@@ -273,7 +276,7 @@ resource nsgBastionSubnet_diagnosticSettings 'Microsoft.Insights/diagnosticSetti
 
 // The regional hub network
 resource vnetHub 'Microsoft.Network/virtualNetworks@2021-05-01' = {
-  name: 'vnet-${location}-hub'
+  name: '${prefix}-vnet-${location}-hub'
   location: location
   properties: {
     addressSpace: {
@@ -328,7 +331,7 @@ resource vnetHub_diagnosticSettings 'Microsoft.Insights/diagnosticSettings@2021-
 // Allocate three IP addresses to the firewall
 var numFirewallIpAddressesToAssign = 3
 resource pipsAzureFirewall 'Microsoft.Network/publicIPAddresses@2021-05-01' = [for i in range(0, numFirewallIpAddressesToAssign): {
-  name: 'pip-fw-${location}-${padLeft(i, 2, '0')}'
+  name: '${prefix}-pip-fw-${location}-${padLeft(i, 2, '0')}'
   location: location
   sku: {
     name: 'Standard'
@@ -367,7 +370,7 @@ resource pipAzureFirewall_diagnosticSetting 'Microsoft.Insights/diagnosticSettin
 
 // Azure Firewall starter policy
 resource fwPolicy 'Microsoft.Network/firewallPolicies@2021-05-01' = {
-  name: 'fw-policies-${location}'
+  name: '${prefix}-fw-policies-${location}'
   location: location
   properties: {
     sku: {
@@ -457,7 +460,7 @@ resource fwPolicy 'Microsoft.Network/firewallPolicies@2021-05-01' = {
 
 // This is the regional Azure Firewall that all regional spoke networks can egress through.
 resource hubFirewall 'Microsoft.Network/azureFirewalls@2021-05-01' = {
-  name: 'fw-${location}'
+  name: '${prefix}-fw-${location}'
   location: location
   zones: [
     '1'

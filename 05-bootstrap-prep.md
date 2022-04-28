@@ -26,7 +26,7 @@ We'll be bootstrapping this cluster with the Flux GitOps agent as installed as a
 
    ```bash
    # [This takes less than one minute.]
-   az group create --name rg-bu0001a0008 --location eastus2
+   az group create --name ${PREFIX_AKS_BASELINE}-rg-bu0001a0008 --location ${TARGET_REGION_AKS_BASELINE}
    ```
 
 1. Get the AKS cluster spoke virtual network resource ID.
@@ -34,7 +34,7 @@ We'll be bootstrapping this cluster with the Flux GitOps agent as installed as a
    > :book: The app team will be deploying to a spoke virtual network, that was already provisioned by the network team.
 
    ```bash
-   export RESOURCEID_VNET_CLUSTERSPOKE_AKS_BASELINE=$(az deployment group show -g rg-enterprise-networking-spokes -n spoke-BU0001A0008 --query properties.outputs.clusterVnetResourceId.value -o tsv)
+   export RESOURCEID_VNET_CLUSTERSPOKE_AKS_BASELINE=$(az deployment group show -g ${PREFIX_AKS_BASELINE}-rg-enterprise-networking-spokes -n spoke-BU0001A0008 --query properties.outputs.clusterVnetResourceId.value -o tsv)
    echo RESOURCEID_VNET_CLUSTERSPOKE_AKS_BASELINE: $RESOURCEID_VNET_CLUSTERSPOKE_AKS_BASELINE
    ```
 
@@ -42,7 +42,7 @@ We'll be bootstrapping this cluster with the Flux GitOps agent as installed as a
 
    ```bash
    # [This takes about four minutes.]
-   az deployment group create -g rg-bu0001a0008 -f acr-stamp.bicep -p targetVnetResourceId=${RESOURCEID_VNET_CLUSTERSPOKE_AKS_BASELINE} location=eastus2
+   az deployment group create -g ${PREFIX_AKS_BASELINE}-rg-bu0001a0008 -f acr-stamp.bicep -p prefix=${PREFIX_AKS_BASELINE} -p location=${TARGET_REGION_AKS_BASELINE} -p targetVnetResourceId=${RESOURCEID_VNET_CLUSTERSPOKE_AKS_BASELINE}
    ```
 
 1. Import cluster management images to your container registry.
@@ -51,7 +51,7 @@ We'll be bootstrapping this cluster with the Flux GitOps agent as installed as a
 
    ```bash
    # Get your ACR instance name
-   export ACR_NAME_AKS_BASELINE=$(az deployment group show -g rg-bu0001a0008 -n acr-stamp --query properties.outputs.containerRegistryName.value -o tsv)
+   export ACR_NAME_AKS_BASELINE=$(az deployment group show -g ${PREFIX_AKS_BASELINE}-rg-bu0001a0008 -n acr-stamp --query properties.outputs.containerRegistryName.value -o tsv)
    echo ACR_NAME_AKS_BASELINE: $ACR_NAME_AKS_BASELINE
 
    # Import core image(s) hosted in public container registries to be used during bootstrapping
@@ -79,7 +79,8 @@ We'll be bootstrapping this cluster with the Flux GitOps agent as installed as a
    Now commit changes to repository.
 
    ```bash
-   git commit -a -m "Update image source to use my ACR instance instead of a public container registry."
+   git add ./cluster-manifests/cluster-baseline-settings/kured.yaml
+   git commit -m "Update image source to use my ACR instance instead of a public container registry."
    git push
    ```
 

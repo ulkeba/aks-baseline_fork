@@ -2,6 +2,9 @@ targetScope = 'resourceGroup'
 
 /*** PARAMETERS ***/
 
+@description('The name prefix for this stamp.')
+param prefix string
+
 @description('The regional network spoke VNet Resource ID that the cluster will be joined to')
 @minLength(79)
 param targetVnetResourceId string
@@ -60,12 +63,12 @@ param gitOpsBootstrappingRepoBranch string = 'main'
 
 var subRgUniqueString = uniqueString('aks', subscription().subscriptionId, resourceGroup().id)
 
-var clusterName = 'aks-${subRgUniqueString}'
-var nodeResourceGroupName = 'rg-${clusterName}-nodepools'
-var defaultAcrName = 'acraks${subRgUniqueString}'
+var clusterName = '${prefix}-aks-${subRgUniqueString}'
+var nodeResourceGroupName = '${prefix}-rg-${clusterName}-nodepools'
+var defaultAcrName = '${prefix}acraks${subRgUniqueString}'
 
-var agwName = 'apw-${clusterName}'
-var wafPolicyName = 'waf-${clusterName}'
+var agwName = '${prefix}-apw-${subRgUniqueString}'
+var wafPolicyName = '${prefix}-waf-${subRgUniqueString}'
 
 var aksIngressDomainName = 'aks-ingress.${domainName}'
 var aksBackendDomainName = 'bu0001a0008-00.${aksIngressDomainName}'
@@ -162,7 +165,7 @@ resource snetPrivatelinkendpoints 'Microsoft.Network/virtualNetworks/subnets@202
 }
 
 resource la 'Microsoft.OperationalInsights/workspaces@2021-12-01-preview' existing = {
-  name: 'la-${clusterName}'
+  name: '${prefix}-la-aks-${subRgUniqueString}'
 }
 
 resource nsA0008 'Microsoft.ContainerService/managedClusters/namespaces@2022-01-02-preview' existing = {
@@ -1051,24 +1054,24 @@ resource paEnforceDefenderInCluster 'Microsoft.Authorization/policyAssignments@2
 
 // The control plane identity used by the cluster. Used for networking access (VNET joining and DNS updating)
 resource miClusterControlPlane 'Microsoft.ManagedIdentity/userAssignedIdentities@2018-11-30' = {
-  name: 'mi-${clusterName}-controlplane'
+  name: '${prefix}-mi-aks-controlplane'
   location: location
 }
 
 // User Managed Identity that App Gateway is assigned. Used for Azure Key Vault Access.
 resource miAppGatewayFrontend 'Microsoft.ManagedIdentity/userAssignedIdentities@2018-11-30' = {
-  name: 'mi-appgateway-frontend'
+  name: '${prefix}-mi-appgateway-frontend'
   location: location
 }
 
 // User Managed Identity for the cluster's ingress controller pods. Used for Azure Key Vault Access
 resource podmiIngressController 'Microsoft.ManagedIdentity/userAssignedIdentities@2018-11-30' = {
-  name: 'podmi-ingress-controller'
+  name: '${prefix}-podmi-ingress-controller'
   location: location
 }
 
 resource kv 'Microsoft.KeyVault/vaults@2021-11-01-preview' = {
-  name: 'kv-${clusterName}'
+  name: '${prefix}-kv-${subRgUniqueString}'
   location: location
   properties: {
     accessPolicies: [] // Azure RBAC is used instead
@@ -1210,7 +1213,7 @@ resource pdzKv 'Microsoft.Network/privateDnsZones@2020-06-01' = {
 }
 
 resource peKv 'Microsoft.Network/privateEndpoints@2021-05-01' = {
-  name: 'pe-${kv.name}'
+  name: '${prefix}-pe-${kv.name}'
   location: location
   properties: {
     subnet: {
@@ -1748,7 +1751,7 @@ resource agw 'Microsoft.Network/applicationGateways@2021-05-01' = {
         name: 'apw-frontend-ip-configuration'
         properties: {
           publicIPAddress: {
-            id: resourceId(subscription().subscriptionId, targetResourceGroup.name, 'Microsoft.Network/publicIpAddresses', 'pip-BU0001A0008-00')
+            id: resourceId(subscription().subscriptionId, targetResourceGroup.name, 'Microsoft.Network/publicIpAddresses', '${prefix}-pip-BU0001A0008-00')
           }
         }
       }

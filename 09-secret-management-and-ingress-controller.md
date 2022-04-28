@@ -7,8 +7,8 @@ Previously you have configured [workload prerequisites](./08-workload-prerequisi
 1. Get the AKS Ingress Controller Managed Identity details.
 
    ```bash
-   TRAEFIK_USER_ASSIGNED_IDENTITY_RESOURCE_ID=$(az deployment group show --resource-group rg-bu0001a0008 -n cluster-stamp --query properties.outputs.aksIngressControllerPodManagedIdentityResourceId.value -o tsv)
-   TRAEFIK_USER_ASSIGNED_IDENTITY_CLIENT_ID=$(az deployment group show --resource-group rg-bu0001a0008 -n cluster-stamp --query properties.outputs.aksIngressControllerPodManagedIdentityClientId.value -o tsv)
+   TRAEFIK_USER_ASSIGNED_IDENTITY_RESOURCE_ID=$(az deployment group show --resource-group ${PREFIX_AKS_BASELINE}-rg-bu0001a0008 -n cluster-stamp --query properties.outputs.aksIngressControllerPodManagedIdentityResourceId.value -o tsv)
+   TRAEFIK_USER_ASSIGNED_IDENTITY_CLIENT_ID=$(az deployment group show --resource-group ${PREFIX_AKS_BASELINE}-rg-bu0001a0008 -n cluster-stamp --query properties.outputs.aksIngressControllerPodManagedIdentityClientId.value -o tsv)
    echo TRAEFIK_USER_ASSIGNED_IDENTITY_RESOURCE_ID: $TRAEFIK_USER_ASSIGNED_IDENTITY_RESOURCE_ID
    echo TRAEFIK_USER_ASSIGNED_IDENTITY_CLIENT_ID: $TRAEFIK_USER_ASSIGNED_IDENTITY_CLIENT_ID
    ```

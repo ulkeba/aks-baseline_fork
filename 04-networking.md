@@ -26,13 +26,6 @@ The following two resource groups will be created and populated with networking 
 * Network Security Groups for all subnets that support them
 
 ## Steps
-1. Set Name Prefix and target region for your resources.
-   ```bash
-   export PREFIX_AKS_BASELINE=t1a
-   export TARGET_REGION_AKS_BASELINE=centralus
-   echo PREFIX_AKS_BASELINE: $PREFIX_AKS_BASELINE
-   echo TARGET_REGION_AKS_BASELINE: $TARGET_REGION_AKS_BASELINE
-   ```
 
 1. Login into the Azure subscription that you'll be deploying into.
 

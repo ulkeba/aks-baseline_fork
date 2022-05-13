@@ -4,10 +4,22 @@ Now that you have the [prerequisites](./01-prerequisites.md) met, follow the ste
 
 ## Steps
 
+1. Define a name prefix (4 characters max) that will be used for Azure resources and your domain as well as the target region. These variables will be used throughout this walkthrough. 
+
+   :warning:  Remember to replace the placeholders with the values you want to use for your deployment.
+
+   ```bash
+   export PREFIX_AKS_BASELINE=<replace with your deployment prefix>
+   export TARGET_REGION_AKS_BASELINE=<replace with your target region>
+   echo PREFIX_AKS_BASELINE: $PREFIX_AKS_BASELINE
+   echo TARGET_REGION_AKS_BASELINE: $TARGET_REGION_AKS_BASELINE
+   ```
+
 1. Set a variable for the domain that will be used in the rest of this deployment.
 
    ```bash
-   export DOMAIN_NAME_AKS_BASELINE="contoso.com"
+   export DOMAIN_NAME_AKS_BASELINE="${PREFIX_AKS_BASELINE}.com"
+   echo DOMAIN_NAME_AKS_BASELINE: $DOMAIN_NAME_AKS_BASELINE
    ```
 
 1. Generate a client-facing self-signed TLS certificate

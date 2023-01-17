@@ -40,10 +40,10 @@ param hubVirtualNetworkAzureFirewallSubnetAddressSpace string = '10.200.0.0/26'
 @minLength(10)
 param hubVirtualNetworkGatewaySubnetAddressSpace string = '10.200.0.64/27'
 
-@description('Optional. A /27 under the virtual network address space for regional Azure Bastion. Defaults to 10.200.0.96/27')
+@description('Optional. A /26 under the virtual network address space for regional Azure Bastion. Defaults to 10.200.0.128/26')
 @maxLength(18)
 @minLength(10)
-param hubVirtualNetworkBastionSubnetAddressSpace string = '10.200.0.96/27'
+param hubVirtualNetworkBastionSubnetAddressSpace string = '10.200.0.128/26'
 
 /*** RESOURCES ***/
 
@@ -469,7 +469,7 @@ resource hubFirewall 'Microsoft.Network/azureFirewalls@2021-05-01' = {
   ]
   dependsOn: [
     // This helps prevent multiple PUT updates happening to the firewall causing a CONFLICT race condition
-    // Ref: https://docs.microsoft.com/azure/firewall-manager/quick-firewall-policy
+    // Ref: https://learn.microsoft.com/azure/firewall-manager/quick-firewall-policy
     fwPolicy::defaultApplicationRuleCollectionGroup
     fwPolicy::defaultNetworkRuleCollectionGroup
   ]

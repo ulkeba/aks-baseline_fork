@@ -147,7 +147,7 @@ resource nsgAppGwSubnet 'Microsoft.Network/networkSecurityGroups@2021-05-01' = {
       {
         name: 'AllowControlPlaneInbound'
         properties: {
-          description: 'Allow Azure Control Plane in. (https://docs.microsoft.com/azure/application-gateway/configuration-infrastructure#network-security-groups)'
+          description: 'Allow Azure Control Plane in. (https://learn.microsoft.com/azure/application-gateway/configuration-infrastructure#network-security-groups)'
           protocol: '*'
           sourcePortRange: '*'
           sourceAddressPrefix: 'GatewayManager'
@@ -161,7 +161,7 @@ resource nsgAppGwSubnet 'Microsoft.Network/networkSecurityGroups@2021-05-01' = {
       {
         name: 'AllowHealthProbesInbound'
         properties: {
-          description: 'Allow Azure Health Probes in. (https://docs.microsoft.com/azure/application-gateway/configuration-infrastructure#network-security-groups)'
+          description: 'Allow Azure Health Probes in. (https://learn.microsoft.com/azure/application-gateway/configuration-infrastructure#network-security-groups)'
           protocol: '*'
           sourcePortRange: '*'
           sourceAddressPrefix: 'AzureLoadBalancer'
